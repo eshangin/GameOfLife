@@ -1,26 +1,4 @@
-﻿function Canvas(el) {
-    var $el = $(el);
-    this.create = function (w, h) {
-        var tbl = '<table style="border: solid 1px #ddd; border-collapse: collapse; position: relative; left: 150px; top: 40px;">';
-        for (var i = 0; i < h; i++) {
-            tbl += '<tr>';
-            for (var j = 0; j < w; j++) {
-                tbl += '<td style="border: solid 1px #ddd; width: 6px; height: 8px;"></td>'
-            }
-            tbl += '</tr>';
-        }
-        tbl += '</table>';
-        $el.html(tbl);
-    };
-
-    this.setCell = function (x, y, type) {
-        var bg = (type == 'live') ? '#3276b1' : 'gray';
-        var $cell = $($($el.find('tr')[y]).find('td')[x]);
-        $cell.css('background-color', bg);
-    }
-}
-
-function Game(containerId) {
+﻿function Game(containerId) {
     var liveItems;
     var canvas = new Canvas(document.getElementById(containerId));
 
@@ -29,84 +7,89 @@ function Game(containerId) {
         var arr = [];
         var checkArr = function (x) {
             // declare array if wasn't declared yet
-            if (typeof arr[x] == 'undefined') {
-                arr[x] = [];
+            if (typeof arr[x.toString()] == 'undefined') {
+                arr[x.toString()] = [];
             }
 
-            return arr[x];
+            return arr[x.toString()];
         }
         self.get = function (x, y) {
             switch (arguments.length) {
                 case 0: return arr;
-                case 1: return checkArr(x);
-                case 2: return checkArr(x)[y];
+                case 1: return checkArr(x.toString());
+                case 2: return checkArr(x.toString())[y.toString()];
             }
         }
         self.set = function (x, y, value) {
-            checkArr(x)[y] = value;
+            checkArr(x.toString())[y.toString()] = value;
+        }
+        self.delete = function (x, y) {
+            delete arr[x][y];
         }
     }
     
     var loadState = function () {
-        liveItems = [
-            { x: 51, y: 48 },
+        liveItems = new Arr2d();
 
-            { x: 50, y: 50 },
-            { x: 51, y: 50 },
+        liveItems.set(51, 48, 1);
 
-            { x: 53, y: 49 },
-            { x: 54, y: 50 },
-            { x: 55, y: 50 },
-            { x: 56, y: 50 }
-        ];
+        liveItems.set(50, 50, 1);
+        liveItems.set(51, 50, 1);
+
+        liveItems.set(53, 49, 1);
+        liveItems.set(54, 50, 1);
+        liveItems.set(55, 50, 1);
+        liveItems.set(56, 50, 1);
     };
 
     var getNeighborsCoords = function (x, y) {
-        return [
-            { x: x - 1, y: y - 1 },
-            { x: x, y: y - 1 },
-            { x: x + 1, y: y - 1 },
-            { x: x - 1, y: y },
-            { x: x + 1, y: y },
-            { x: x - 1, y: y + 1 },
-            { x: x, y: y + 1 },
-            { x: x + 1, y: y + 1 }
-        ];
+        var bigX = new bigInt(x);
+        var bigY = new bigInt(y);
+
+        var result = new Arr2d();
+
+        result.set(bigX.add(-1).toString(), bigY.add(-1).toString(), 1);
+        result.set(bigX.toString(), bigY.add(-1).toString(), 1);
+        result.set(bigX.add(1).toString(), bigY.add(-1).toString(), 1);
+        result.set(bigX.add(-1).toString(), bigY.toString(), 1);
+        result.set(bigX.add(1).toString(), bigY.toString(), 1);
+        result.set(bigX.add(-1).toString(), bigY.add(1).toString(), 1);
+        result.set(bigX.toString(), bigY.add(1).toString(), 1);
+        result.set(bigX.add(1).toString(), bigY.add(1).toString(), 1);
+
+        return result;
     }
 
     var getReadyToBorn = function () {
         var empty = new Arr2d();
-        for (var i = 0; i < liveItems.length; i++) {
-            var item = liveItems[i];
-            var neighbors = getNeighborsCoords(item.x, item.y);
 
-            // now check each neighbor if it is empty
-            for (var k = 0; k < neighbors.length; k++) {
-                var isEmpty = true;
-                for (var j = 0; j < liveItems.length; j++) {
-                    if (liveItems[j].x == neighbors[k].x && liveItems[j].y == neighbors[k].y) {
-                        isEmpty = false;
-                        break;
-                    }
-                }
-                if (isEmpty) {
-                    if (typeof empty.get(neighbors[k].x, neighbors[k].y) == 'undefined') {
-                        empty.set(neighbors[k].x, neighbors[k].y, 1);
-                    }
-                    else {
-                        empty.set(neighbors[k].x, neighbors[k].y, empty.get(neighbors[k].x, neighbors[k].y) + 1);
+        for (var i in liveItems.get()) {
+            for (var j in liveItems.get(i)) {
+                var neighbors = getNeighborsCoords(i, j);
+
+                // now check each neighbor if it is empty
+                for (var nx in neighbors.get()) {
+                    for (var ny in neighbors.get(nx)) {
+                        if (typeof liveItems.get(nx, ny) == 'undefined') {
+                            if (typeof empty.get(nx, ny) == 'undefined') {
+                                empty.set(nx, ny, 1);
+                            }
+                            else {
+                                empty.set(nx, ny, empty.get(nx, ny) + 1);
+                            }
+                        }
                     }
                 }
             }
         }
 
-        var result = [];
+        var result = new Arr2d();
 
         // return empty items with 3 live neighbors only
         for (var x in empty.get()) {
             for (var y in empty.get(x)) {
                 if (empty.get(x, y) == 3) {
-                    result.push({ x: +x, y: +y });
+                    result.set(x, y, 1);
                 }
             }
         }
@@ -114,20 +97,31 @@ function Game(containerId) {
         return result;
     }
 
+    var getReadyToDie = function () {
+        var willDie = new Arr2d();
+
+        // for each live item calculate if it should live in next cycle
+        for (var x in liveItems.get()) {
+            for (var y in liveItems.get(x)) {
+                var nCount = getLiveNeighborsCount(x, y);
+                if (nCount != 2 && nCount != 3) {
+                    willDie.set(x, y, 1);
+                }
+            }
+        }
+
+        return willDie;
+    };
+
     var getLiveNeighborsCount = function (x, y) {
         var potentialNeighbors = getNeighborsCoords(x, y);
 
         var neighborsCount = 0;
 
-        for (var i = 0; i < liveItems.length; i++) {
-            var item = liveItems[i];
-
-            // check if it is not current item
-            if (item.x != x || item.y != y) {
-                for (var j = 0; j < potentialNeighbors.length; j++) {
-                    if (item.x == potentialNeighbors[j].x && item.y == potentialNeighbors[j].y) {
-                        neighborsCount++;
-                    }
+        for (var i in potentialNeighbors.get()) {
+            for (var j in potentialNeighbors.get(i)) {
+                if (typeof liveItems.get(i, j) != 'undefined') {
+                    neighborsCount++;
                 }
             }
         }
@@ -141,49 +135,43 @@ function Game(containerId) {
         canvas.create(80, 80);
 
         // draw initial state
-        for (var i = 0; i < liveItems.length; i++) {
-            canvas.setCell(liveItems[i].x, liveItems[i].y, 'live');
+        for (var x in liveItems.get()) {
+            for (var y in liveItems.get(x)) {
+                canvas.setCell(x, y, 'live');
+            }
         }
     })();
 
     // remove died item, add new items (if any)
     var updateItems = function (itemsToDie, itemsToBorn) {
-        for (var i = 0; i < itemsToDie.length; i++) {
-            var indexToDel = itemsToDie[i].index - i;
-            liveItems.splice(indexToDel, 1);
-            canvas.setCell(itemsToDie[i].item.x, itemsToDie[i].item.y, 'die');
-        }
-
-        liveItems = liveItems.concat(itemsToBorn);
-
-        for (var i = 0; i < itemsToBorn.length; i++) {
-            canvas.setCell(itemsToBorn[i].x, itemsToBorn[i].y, 'live');
-        }
-
-        //console.log(liveItems);
-    }
-
-    var runCycle = function () {
-        var willDie = [];
-        var willBorn = [];
-
-        // for each live item calculate if it should live in next cycle
-        for (var i = 0; i < liveItems.length; i++) {
-            var item = liveItems[i];
-            var nCount = getLiveNeighborsCount(item.x, item.y);
-            if (nCount != 2 && nCount != 3) {
-                willDie.push({ item: item, index: i });
+        for (var x in itemsToDie.get()) {
+            for (var y in itemsToDie.get(x)) {
+                liveItems.delete(x, y);
+                canvas.setCell(x, y, 'die');
             }
         }
 
+        for (var x in itemsToBorn.get()) {
+            for (var y in itemsToBorn.get(x)) {
+                if (typeof liveItems.get(x, y) == 'undefined') {
+                    liveItems.set(x, y, 1);
+                    canvas.setCell(x, y, 'live');
+                }
+            }
+        }
+    }
+
+    var runCycle = function () {
+        var readyToDie = getReadyToDie();
+
         var readyToBorn = getReadyToBorn();
 
-        updateItems(willDie, readyToBorn);
+        updateItems(readyToDie, readyToBorn);
     }
 
     this.run = function () {
         for (var i = 0; i < 100; i++) {
-            setTimeout(runCycle, i * 10);
+            setTimeout(runCycle, i * 200);
         }
     };
 }
