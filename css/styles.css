@@ -1,5 +1,18 @@
+.l-page {
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.l-canvas {
+    float: left;
+}
+
+.l-controls {
+    float: right;
+}
+
 .b-canvas {
-    border: solid 1px #ddd; border-collapse: collapse; position: relative; left: 150px; top: 40px;
+    border: solid 1px #ddd; border-collapse: collapse;
 }
 
 .b-canvas__cell {
@@ -11,5 +24,13 @@
 }
 
 .b-canvas__cell-died {
-    background-color: gray;
+    background-color: #fff;
+}
+
+.b-control {
+    margin-bottom: 10px;
+}
+
+.b-control__input {
+    width: 50px;
 }

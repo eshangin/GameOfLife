@@ -5,17 +5,36 @@
         <link rel="stylesheet" href="css/styles.css" type="text/css" />
 
 		<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-        <script src="http://peterolson.github.com/BigInteger.js/BigInteger.min.js"></script>
+        <script type="text/javascript" src="http://peterolson.github.com/BigInteger.js/BigInteger.min.js"></script>
+        <script type="text/javascript" src="http://knockoutjs.com/downloads/knockout-3.1.0.debug.js"></script>        
         <script type="text/javascript" src="js/game-canvas.js"></script>
 		<script type="text/javascript" src="js/game.js"></script>
 		<script>
 			$(document).ready(function () {
-			    var game = new Game('canvas');
-			    game.run();
+			    var game = new Game('canvas', 'controls');
 			});
 		</script>
 	</head>
 	<body>
-		<div id="canvas"></div>
+        <div class="l-page">
+		    <div class="l-canvas" id="canvas"></div>
+            <div class="l-controls" id="controls">
+                <div>
+                    <!--<div class="b-control">
+                        Canvas Width <input data-bind="value: canvasW, disable: gameLaunched" class="b-control__input" />
+                    </div>
+                    <div class="b-control">
+                        Canvas Height <input data-bind="value: canvasH, disable: gameLaunched" class="b-control__input" />
+                    </div>
+                    <div>
+                        <button data-bind="click: updateCanvas, disable: gameLaunched">Update Canvas</button>
+                    </div>-->
+                    <div>
+                        <button data-bind="click: startStop, text: gameLaunched() ? 'Stop' : 'Start'" type="button">Start</button>
+                    </div>
+                </div>
+            </div>
+            <div style="clear:both"></div>
+        </div>
 	</body>
 </html>

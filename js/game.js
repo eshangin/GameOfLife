@@ -1,6 +1,11 @@
-﻿function Game(containerId) {
+﻿function Game(containerId, controlsId) {
+    var self = this;
+
     var liveItems;
     var canvas = new Canvas(document.getElementById(containerId));
+    var $controlsContainer = $('#' + controlsId);
+    var gameLaunched = ko.observable(false);
+    var forceStop = false;
 
     function Arr2d() {
         var self = this;
@@ -131,8 +136,36 @@
 
     // init
     (function () {
+        $(document.getElementById(containerId)).on("cell-click", function (event, x, y) {
+            // handle only if game is not launched
+            if (!gameLaunched()) {
+                alert(x + "\n" + y);
+            }
+        });
+
+        var ControlsModel = function () {
+            this.canvasW = ko.observable(80);
+            this.canvasH = ko.observable(80);
+            this.startStop = function () {
+                if (!gameLaunched()) {
+                    self.run();
+                }
+                else {
+                    forceStop = true;
+                }
+            };
+            this.gameLaunched = ko.computed(function () {
+                return gameLaunched();
+            });
+            this.updateCanvas = function () {
+                canvas.create(this.canvasW(), this.canvasH());
+            };
+            this.updateCanvas();
+        };
+        var controlsModel = new ControlsModel();
+        ko.applyBindings(controlsModel, document.getElementById(controlsId));
+
         loadState();
-        canvas.create(80, 80);
 
         // draw initial state
         for (var x in liveItems.get()) {
@@ -181,10 +214,16 @@
 
     this.run = function () {
 
+        gameLaunched(true);
+
         (function recurse(i, count) {
             runCyclePromise(20).then(function () {
-                if (i + 1 < count) {
+                if (i + 1 < count && !forceStop) {
                     recurse(i + 1, count);
+                }
+                else {
+                    forceStop = false;
+                    gameLaunched(false);
                 }
             });
         })(0, 50);

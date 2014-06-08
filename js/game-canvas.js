@@ -18,4 +18,9 @@ function Canvas(el) {
         var $cell = $($($el.find('tr')[y]).find('td')[x]);
         $cell.addClass(css);
     }
+
+    $(el).delegate('td', 'click', function () {
+        // trigger custom event, pass cell X and Y as a parameters
+        $(el).trigger('cell-click', [$(this).index(), $(this).closest('tr').index()]);
+    });
 }
