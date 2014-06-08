@@ -163,15 +163,31 @@
 
     var runCycle = function () {
         var readyToDie = getReadyToDie();
-
         var readyToBorn = getReadyToBorn();
 
         updateItems(readyToDie, readyToBorn);
     }
 
+    var runCyclePromise = function (delay) {
+        var def = $.Deferred();
+
+        setTimeout(function () {
+            runCycle();
+            def.resolve();
+        }, delay);
+
+        return def;
+    }
+
     this.run = function () {
-        for (var i = 0; i < 100; i++) {
-            setTimeout(runCycle, i * 200);
-        }
+
+        (function recurse(i, count) {
+            runCyclePromise(20).then(function () {
+                if (i + 1 < count) {
+                    recurse(i + 1, count);
+                }
+            });
+        })(0, 100);
+
     };
 }
