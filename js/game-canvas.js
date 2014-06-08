@@ -1,11 +1,11 @@
 function Canvas(el) {
     var $el = $(el);
     this.create = function (w, h) {
-        var tbl = '<table style="border: solid 1px #ddd; border-collapse: collapse; position: relative; left: 150px; top: 40px;">';
+        var tbl = '<table class="b-canvas">';
         for (var i = 0; i < h; i++) {
             tbl += '<tr>';
             for (var j = 0; j < w; j++) {
-                tbl += '<td style="border: solid 1px #ddd; width: 6px; height: 8px;"></td>'
+                tbl += '<td class="b-canvas__cell"></td>'
             }
             tbl += '</tr>';
         }
@@ -14,8 +14,8 @@ function Canvas(el) {
     };
 
     this.setCell = function (x, y, type) {
-        var bg = (type == 'live') ? '#3276b1' : 'gray';
+        var css = (type == 'live') ? 'b-canvas__cell-live' : 'b-canvas__cell-died';
         var $cell = $($($el.find('tr')[y]).find('td')[x]);
-        $cell.css('background-color', bg);
+        $cell.addClass(css);
     }
 }

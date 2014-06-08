@@ -1,0 +1,15 @@
+.b-canvas {
+    border: solid 1px #ddd; border-collapse: collapse; position: relative; left: 150px; top: 40px;
+}
+
+.b-canvas__cell {
+    border: solid 1px #ddd; width: 6px; height: 8px;
+}
+
+.b-canvas__cell-live {
+    background-color: #3276b1;
+}
+
+.b-canvas__cell-died {
+    background-color: gray;
+}
