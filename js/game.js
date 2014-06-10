@@ -1,7 +1,6 @@
 ﻿function Game(containerId, controlsId) {
     var self = this;
 
-    var liveItems;
     var canvas = new Canvas(document.getElementById(containerId));
     var $controlsContainer = $('#' + controlsId);
     var gameLaunched = ko.observable(false);
@@ -32,19 +31,38 @@
             delete arr[x][y];
         }
     }
+
+    function GliderList() {
+        this.array = new Arr2d();
+
+        this.setLive = function (x, y) {
+            this.array.set(x, y, 1);
+            canvas.setCell(x, y, 'live');
+        }
+
+        this.setDie = function (x, y) {
+            this.array.delete(x, y);
+            canvas.setCell(x, y, 'died');
+        }
+
+        this.remove = function (x, y) {
+            this.array.delete(x, y);
+            canvas.setCell(x, y, 'empty');
+        }
+    }
+
+    var gliders = new GliderList();
     
     var loadState = function () {
-        liveItems = new Arr2d();
+        gliders.setLive(51, 48);
 
-        liveItems.set(51, 48, 1);
+        gliders.setLive(50, 50);
+        gliders.setLive(51, 50);
 
-        liveItems.set(50, 50, 1);
-        liveItems.set(51, 50, 1);
-
-        liveItems.set(53, 49, 1);
-        liveItems.set(54, 50, 1);
-        liveItems.set(55, 50, 1);
-        liveItems.set(56, 50, 1);
+        gliders.setLive(53, 49);
+        gliders.setLive(54, 50);
+        gliders.setLive(55, 50);
+        gliders.setLive(56, 50);
     };
 
     var getNeighborsCoords = function (x, y) {
@@ -74,8 +92,8 @@
             willBorn: new Arr2d()
         };
 
-        for (var i in liveItems.get()) {
-            for (var j in liveItems.get(i)) {
+        for (var i in gliders.array.get()) {
+            for (var j in gliders.array.get(i)) {
                 var neighbors = getNeighborsCoords(i, j);
 
                 var liveNeighbors = 0;
@@ -83,7 +101,7 @@
                 // now check each neighbor if it is empty
                 for (var nx in neighbors.get()) {
                     for (var ny in neighbors.get(nx)) {
-                        if (typeof liveItems.get(nx, ny) == 'undefined') {
+                        if (typeof gliders.array.get(nx, ny) == 'undefined') {
                             if (typeof empty.get(nx, ny) == 'undefined') {
                                 empty.set(nx, ny, 1);
                             }
@@ -123,7 +141,7 @@
 
         for (var i in potentialNeighbors.get()) {
             for (var j in potentialNeighbors.get(i)) {
-                if (typeof liveItems.get(i, j) != 'undefined') {
+                if (typeof gliders.array.get(i, j) != 'undefined') {
                     neighborsCount++;
                 }
             }
@@ -137,13 +155,11 @@
         $(document.getElementById(containerId)).on("cell-click", function (event, x, y) {
             // handle only if game is not launched
             if (!gameLaunched()) {
-                if (typeof liveItems.get(x, y) == 'undefined') {
-                    liveItems.set(x, y, 1);
-                    canvas.setCell(x, y, 'live');
+                if (typeof gliders.array.get(x, y) == 'undefined') {
+                    gliders.setLive(x, y, 1);
                 }
                 else {
-                    liveItems.delete(x, y);
-                    canvas.setCell(x, y, 'empty');
+                    gliders.remove(x, y);
                 }
             }
         });
@@ -170,30 +186,22 @@
         var controlsModel = new ControlsModel();
         ko.applyBindings(controlsModel, document.getElementById(controlsId));
 
+        // load initial state
         loadState();
-
-        // draw initial state
-        for (var x in liveItems.get()) {
-            for (var y in liveItems.get(x)) {
-                canvas.setCell(x, y, 'live');
-            }
-        }
     })();
 
     // remove died item, add new items (if any)
     var updateItems = function (itemsToDie, itemsToBorn) {
         for (var x in itemsToDie.get()) {
             for (var y in itemsToDie.get(x)) {
-                liveItems.delete(x, y);
-                canvas.setCell(x, y, 'died');
+                gliders.setDie(x, y);
             }
         }
 
         for (var x in itemsToBorn.get()) {
             for (var y in itemsToBorn.get(x)) {
-                if (typeof liveItems.get(x, y) == 'undefined') {
-                    liveItems.set(x, y, 1);
-                    canvas.setCell(x, y, 'live');
+                if (typeof gliders.array.get(x, y) == 'undefined') {
+                    gliders.setLive(x, y, 1);
                 }
             }
         }
