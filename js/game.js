@@ -139,7 +139,14 @@
         $(document.getElementById(containerId)).on("cell-click", function (event, x, y) {
             // handle only if game is not launched
             if (!gameLaunched()) {
-                alert(x + "\n" + y);
+                if (typeof liveItems.get(x, y) == 'undefined') {
+                    liveItems.set(x, y, 1);
+                    canvas.setCell(x, y, 'live');
+                }
+                else {
+                    liveItems.delete(x, y);
+                    canvas.setCell(x, y, 'empty');
+                }
             }
         });
 
@@ -180,7 +187,7 @@
         for (var x in itemsToDie.get()) {
             for (var y in itemsToDie.get(x)) {
                 liveItems.delete(x, y);
-                canvas.setCell(x, y, 'die');
+                canvas.setCell(x, y, 'died');
             }
         }
 

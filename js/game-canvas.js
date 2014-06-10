@@ -14,9 +14,19 @@ function Canvas(el) {
     };
 
     this.setCell = function (x, y, type) {
-        var css = (type == 'live') ? 'b-canvas__cell-live' : 'b-canvas__cell-died';
         var $cell = $($($el.find('tr')[y]).find('td')[x]);
-        $cell.addClass(css);
+        switch (type) {
+            case 'live':
+                css = 'b-canvas__cell-live';
+                break;
+            case 'died':
+                css = 'b-canvas__cell-died';
+                break;
+            default:
+                css = '';
+                break;
+        }        
+        $cell.removeClass('b-canvas__cell-live b-canvas__cell-died').addClass(css);
     }
 
     $(el).delegate('td', 'click', function () {
