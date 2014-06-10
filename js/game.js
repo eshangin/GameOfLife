@@ -6,32 +6,6 @@
     var gameLaunched = ko.observable(false);
     var forceStop = false;
 
-    function Arr2d() {
-        var self = this;
-        var arr = [];
-        var checkArr = function (x) {
-            // declare array if wasn't declared yet
-            if (typeof arr[x.toString()] == 'undefined') {
-                arr[x.toString()] = [];
-            }
-
-            return arr[x.toString()];
-        }
-        self.get = function (x, y) {
-            switch (arguments.length) {
-                case 0: return arr;
-                case 1: return checkArr(x.toString());
-                case 2: return checkArr(x.toString())[y.toString()];
-            }
-        }
-        self.set = function (x, y, value) {
-            checkArr(x.toString())[y.toString()] = value;
-        }
-        self.delete = function (x, y) {
-            delete arr[x][y];
-        }
-    }
-
     function GliderList() {
         this.array = new Arr2d();
 
@@ -48,6 +22,14 @@
         this.remove = function (x, y) {
             this.array.delete(x, y);
             canvas.setCell(x, y, 'empty');
+        }
+
+        this.clear = function () {
+            for (var x in this.array.get()) {
+                for (var y in this.array.get(x)) {
+                    this.remove(x, y);
+                }
+            }
         }
     }
 
@@ -132,22 +114,6 @@
         }
 
         return result;
-    }
-
-    var getLiveNeighborsCount = function (x, y) {
-        var potentialNeighbors = getNeighborsCoords(x, y);
-
-        var neighborsCount = 0;
-
-        for (var i in potentialNeighbors.get()) {
-            for (var j in potentialNeighbors.get(i)) {
-                if (typeof gliders.array.get(i, j) != 'undefined') {
-                    neighborsCount++;
-                }
-            }
-        }
-
-        return neighborsCount;
     };
 
     // init
@@ -162,6 +128,9 @@
                     gliders.remove(x, y);
                 }
             }
+            else {
+                alert('You should stop game first!');
+            }
         });
 
         var ControlsModel = function () {
@@ -174,6 +143,10 @@
                 else {
                     forceStop = true;
                 }
+            };
+            this.clear = function () {
+                gliders.clear();
+                canvas.clear();
             };
             this.gameLaunched = ko.computed(function () {
                 return gameLaunched();

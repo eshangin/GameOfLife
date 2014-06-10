@@ -7,6 +7,7 @@
 		<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
         <script type="text/javascript" src="http://peterolson.github.com/BigInteger.js/BigInteger.min.js"></script>
         <script type="text/javascript" src="http://knockoutjs.com/downloads/knockout-3.1.0.debug.js"></script>        
+        <script type="text/javascript" src="js/Arr2d.js"></script>
         <script type="text/javascript" src="js/game-canvas.js"></script>
 		<script type="text/javascript" src="js/game.js"></script>
 		<script>
@@ -31,6 +32,7 @@
                     </div>-->
                     <div>
                         <button data-bind="click: startStop, text: gameLaunched() ? 'Stop' : 'Start'" type="button">Start</button>
+                        <button data-bind="click: clear, disable: gameLaunched()" type="button">Clear</button>
                     </div>
                 </div>
             </div>

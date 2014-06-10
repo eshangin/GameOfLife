@@ -29,6 +29,10 @@ function Canvas(el) {
         $cell.removeClass('b-canvas__cell-live b-canvas__cell-died').addClass(css);
     }
 
+    this.clear = function () {
+        $el.find('td').removeClass('b-canvas__cell-live b-canvas__cell-died');
+    }
+
     $(el).delegate('td', 'click', function () {
         // trigger custom event, pass cell X and Y as a parameters
         $(el).trigger('cell-click', [$(this).index(), $(this).closest('tr').index()]);
