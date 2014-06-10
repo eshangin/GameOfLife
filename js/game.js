@@ -65,12 +65,20 @@
         return result;
     }
 
-    var getReadyToBorn = function () {
+    // get info which gliders died/become live
+    var getChanges = function () {
         var empty = new Arr2d();
+
+        var result = {
+            willDie: new Arr2d(),
+            willBorn: new Arr2d()
+        };
 
         for (var i in liveItems.get()) {
             for (var j in liveItems.get(i)) {
                 var neighbors = getNeighborsCoords(i, j);
+
+                var liveNeighbors = 0;
 
                 // now check each neighbor if it is empty
                 for (var nx in neighbors.get()) {
@@ -83,40 +91,30 @@
                                 empty.set(nx, ny, empty.get(nx, ny) + 1);
                             }
                         }
+                        else {
+                            liveNeighbors++;
+                        }
                     }
+                }
+
+                // will glider live in next cycle?
+                if (liveNeighbors != 2 && liveNeighbors != 3) {
+                    result.willDie.set(i, j, 1);
                 }
             }
         }
-
-        var result = new Arr2d();
 
         // return empty items with 3 live neighbors only
         for (var x in empty.get()) {
             for (var y in empty.get(x)) {
                 if (empty.get(x, y) == 3) {
-                    result.set(x, y, 1);
+                    result.willBorn.set(x, y, 1);
                 }
             }
         }
 
         return result;
     }
-
-    var getReadyToDie = function () {
-        var willDie = new Arr2d();
-
-        // for each live item calculate if it should live in next cycle
-        for (var x in liveItems.get()) {
-            for (var y in liveItems.get(x)) {
-                var nCount = getLiveNeighborsCount(x, y);
-                if (nCount != 2 && nCount != 3) {
-                    willDie.set(x, y, 1);
-                }
-            }
-        }
-
-        return willDie;
-    };
 
     var getLiveNeighborsCount = function (x, y) {
         var potentialNeighbors = getNeighborsCoords(x, y);
@@ -202,10 +200,9 @@
     }
 
     var runCycle = function () {
-        var readyToDie = getReadyToDie();
-        var readyToBorn = getReadyToBorn();
+        var res = getChanges();
 
-        updateItems(readyToDie, readyToBorn);
+        updateItems(res.willDie, res.willBorn);
     }
 
     var runCyclePromise = function (delay) {
@@ -223,17 +220,17 @@
 
         gameLaunched(true);
 
-        (function recurse(i, count) {
+        (function recurse() {
             runCyclePromise(20).then(function () {
-                if (i + 1 < count && !forceStop) {
-                    recurse(i + 1, count);
+                if (!forceStop) {
+                    recurse();
                 }
                 else {
                     forceStop = false;
                     gameLaunched(false);
                 }
             });
-        })(0, 50);
+        })();
 
     };
 }
